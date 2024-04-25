@@ -33,11 +33,11 @@
 
 1. Клонировать данный репозиторий:
 
-```git clone https://github.com/Rept1s/Bot_Subscribe_Telegram```
+```git clone https://github.com/Rept1s/Bot-Subscribe-Telegram```
 
 2. Перейти в папку:
 
-```cd Bot_Subscribe_Telegram```
+```cd Bot-Subscribe-Telegram```
 
 3. Установка требований:
 
