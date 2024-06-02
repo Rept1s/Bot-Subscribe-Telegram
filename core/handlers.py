@@ -8,7 +8,7 @@ async def delete_start_func(message: Message):
         Удаление сообщения пользователя и запуск остальных функций.
     """
     if not await user_is_subscriber(message.bot, message.from_user.id, Env().str("CHANNEL_ID")):
-        await AlbumHandler().check_album(message)
+        await AlbumHandler().check_album_and_send(message)
 
 
 async def user_is_subscriber(bot, user_id: int, channel_id: str) -> bool:
