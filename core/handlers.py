@@ -1,7 +1,6 @@
 import asyncio
 from environs import Env
 from aiogram.types import Message, InlineKeyboardButton, InlineKeyboardMarkup
-album_end_tracker = {}
 
 
 async def delete_start_func(message: Message):
