@@ -9,9 +9,7 @@ async def delete_start_func(message: Message):
         Удаление сообщения пользователя и запуск остальных функций.
     """
     if not await user_is_subscriber(message.bot, message.from_user.id, Env().str("CHANNEL_ID")):
-        await message.delete()
-        if await check_album(message) is False:
-            await answer_message(message)
+        await AlbumHandler().check_album(message)
 
 
 async def user_is_subscriber(bot, user_id: int, channel_id: str) -> bool:
@@ -26,23 +24,30 @@ async def user_is_subscriber(bot, user_id: int, channel_id: str) -> bool:
         return False
 
 
-async def check_album(message: Message):
-    """
-        Проверяет, является ли альбомом, для того, чтобы в дальнейшем не дублировать сообщение с просьбой подписаться.
-    """
-    if message.media_group_id:
-        if message.media_group_id not in album_end_tracker:
-            album_end_tracker[message.media_group_id] = message.message_id
-        else:
-            album_end_tracker[message.media_group_id] = max(album_end_tracker[message.media_group_id],
-                                                            message.message_id)
+class AlbumHandler:
+    def __init__(self):
+        self.album_end_tracker = defaultdict(list)
+        self.album_locks = defaultdict(asyncio.Lock)
 
-        await asyncio.sleep(4)  # Ожидание, для получения всего альбома
-        if album_end_tracker[message.media_group_id] == message.message_id:
+    async def check_album_and_send(self, message: Message):
+        """
+        Проверяет, является ли альбомом, для того чтобы в дальнейшем не дублировать сообщение с просьбой подписаться.
+        """
+        if message.media_group_id:
+            self.album_end_tracker[message.media_group_id].append(message.message_id)
+
+            async with self.album_locks[message.media_group_id]:
+                await asyncio.sleep(4)
+                if self.album_end_tracker[message.media_group_id][-1] == message.message_id:
+
+                    for msg_id in self.album_end_tracker[message.media_group_id]:
+                        await message.bot.delete_message(message.chat.id, msg_id)
+                    del self.album_end_tracker[message.media_group_id]
+                    del self.album_locks[message.media_group_id]
+                    await answer_message(message)
+        else:
+            await message.delete()
             await answer_message(message)
-            del album_end_tracker[message.media_group_id]
-    else:
-        return False
 
 
 async def first_name(message: Message):
