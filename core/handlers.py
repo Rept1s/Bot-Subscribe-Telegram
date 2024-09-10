@@ -1,6 +1,7 @@
 import asyncio
 from environs import Env
 from aiogram.types import Message, InlineKeyboardButton, InlineKeyboardMarkup
+from collections import defaultdict
 
 
 async def delete_start_func(message: Message):
